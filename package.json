@@ -1,0 +1,17 @@
+{
+  "name": "overworld",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cortexjs": "^0.6.2",
+    "ee-mixin": "git://github.com/mizchi/ee-mixin",
+    "extend": "^2.0.0",
+    "react": "^0.12.1"
+  }
+}
