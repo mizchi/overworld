@@ -1,17 +1,22 @@
 {
   "name": "overworld",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "./lib/overworld.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./scripts/test",
+    "build": "./scripts/build"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "cortexjs": "^0.6.2",
-    "ee-mixin": "git://github.com/mizchi/ee-mixin",
-    "extend": "^2.0.0",
-    "react": "^0.12.1"
+    "eventemitter2": "^0.4.14",
+    "extend": "^2.0.0"
+  },
+  "devDependencies": {
+    "dts-bundle": "^0.2.0",
+    "coffee-script": "^1.8.0",
+    "hartman": "^0.2.2",
+    "mocha": "^2.0.1"
   }
 }

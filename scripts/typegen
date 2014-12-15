@@ -1,0 +1,5 @@
+#!/usr/bin/env coffee
+dts = require 'dts-bundle'
+dts.bundle
+  name: 'Overworld'
+  main: './lib/index.d.ts'

@@ -1,0 +1,11 @@
+{
+  "srcDir": "src",
+  "testDir": "test",
+  "inputType": "ts",
+  "outputType": "coffee",
+  "suffix": "test",
+  "excludes": [
+    "src/overworld/interfaces/",
+    "src/index"
+  ]
+}
