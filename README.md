@@ -1,5 +1,7 @@
 # Overworld
 
+![](https://cdn0.iconfinder.com/data/icons/gcons-2/21/world7-512.png)
+
 ## CAUTION
 
 This is under development with dog fooding by myself.
