@@ -64,6 +64,7 @@ declare module '__Overworld/overworld/world' {
         resume(): void;
         dispose(): void;
         renderTo(templateProps: any, el: any, component?: any): Promise<any>;
+        render(templateProps: any): any;
     }
     export = World;
 }

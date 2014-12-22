@@ -73,7 +73,7 @@ class World {
           done(component)
         });
       } else {
-        var view = this._render(templateProps);
+        var view = this.render(templateProps);
         this._component = React.render(view, el);
         this.emitter.emit(LifeCycle.MOUNTED);
         done(this._component)
@@ -81,7 +81,7 @@ class World {
     });
   }
 
-  private _render(templateProps: any) {
+  public render(templateProps: any) {
     var React = utils.getReact();
     return this._rootElement(templateProps);
   }
@@ -95,12 +95,14 @@ class World {
 
     //aggregator
     var aggregator = self.constructor.aggregator;
-    this._aggregator = new Aggregator(aggregator);
+    if(aggregator)
+      this._aggregator = new Aggregator(aggregator);
 
     //subscribe
     this._subscriber = self.constructor.subscriber;
 
-    this._subscriber( subscribe(this) );
+    if(this._subscriber)
+      this._subscriber( subscribe(this) );
   }
 }
 
