@@ -34,7 +34,7 @@ class HelloWorld extends Overworld.World {
   });
 
   static aggregator = (pipe) => {
-    pipe.on('init', (props) => ({id: 'initial'}));
+    pipe.on('initState', (props) => ({id: 'initial'}));
     pipe.on('aggregate', (props, state) => ({body: 'body of '+state.id}));
   }
 

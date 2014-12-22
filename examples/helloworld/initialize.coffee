@@ -22,7 +22,7 @@ class HelloWorld extends Overworld.World
 
   @aggregator: (pipe) ->
     pipe
-    .on 'init', (props) -> {id: 'initial'}
+    .on 'initState', (props) -> {id: 'initial'}
     .on 'aggregate', (props, state) -> {body: 'body of '+state.id}
 
   @subscriber: (subscribe) ->

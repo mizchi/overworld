@@ -31,7 +31,7 @@ var HelloWorld = (function (_super) {
         }
     });
     HelloWorld.aggregator = function (pipe) {
-        pipe.on('init', function (props) { return ({ id: 'initial' }); });
+        pipe.on('initState', function (props) { return ({ id: 'initial' }); });
         pipe.on('aggregate', function (props, state) { return ({ body: 'body of ' + state.id }); });
     };
     HelloWorld.subscriber = function (subscribe) {

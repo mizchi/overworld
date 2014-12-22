@@ -28,7 +28,7 @@ class MainWorld extends Overworld.World
 
   @aggregator: (pipe) ->
     pipe
-    .on 'init', (props) -> {}
+    .on 'initState', (props) -> {}
     .on 'aggregate', (props, state) ->
       {cnt: props.cnt}
 
@@ -58,7 +58,7 @@ class SubWorld extends Overworld.World
 
   @aggregator: (pipe) ->
     pipe
-    .on 'init', (props) -> {}
+    .on 'initState', (props) -> {}
     .on 'aggregate', (props, state) -> {cnt: props.cnt}
 
   @subscriber: (subscribe) ->
@@ -85,7 +85,7 @@ class Layout extends Overworld.World
 
   @aggregator: (pipe) ->
     pipe
-    .on 'init', (props) -> {}
+    .on 'initState', (props) -> {}
     .on 'aggregate', (props, state) -> {}
 
   @subscriber: (subscribe) ->
