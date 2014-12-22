@@ -3,25 +3,6 @@ import utils = require('./utils/utils');
 import Aggregator = require('./aggregator');
 import LifeCycle = require('./lifecycle');
 
-interface InitAggregatorResult{
-  props: any;
-  state: any;
-  templateProps: any;
-}
-
-function initAggregator(aggregator: Aggregator<any, any, any>, props: any)
-: Promise<InitAggregatorResult>{
-  return new Promise(done => {
-    Promise.resolve(aggregator.init(props))
-    .then(state => {
-      Promise.resolve(aggregator.aggregate(props, state))
-      .then(templateProps => {
-        done({props: props, state: state, templateProps: templateProps});
-      });
-    });
-  });
-}
-
 interface LinkNode {
   type: string;
   uuid: string;
@@ -109,7 +90,7 @@ class Portal {
   private renderNode(node: LinkNode, props, component): Promise<any>{
     var world = node.instance;
     return new Promise((done) =>{
-      initAggregator(world.aggregator, props).then((result) => {
+      world.aggregator.buildTemplateProps(world.aggregator, props).then((result) => {
         // backdoor initializer
         world.init(result.props, result.state);
         world.renderTo(result.templateProps, node.target, component).then((mountedComponent)=>{

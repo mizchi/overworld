@@ -73,8 +73,13 @@ declare module '__Overworld/overworld/aggregator' {
     class Aggregator<P, S, T> {
         constructor(aggregateFn: any);
         on(eventName: string, fn: Function): Aggregator<P, S, T>;
-        init(props: P): S;
+        initState(props: P): S;
         aggregate(props: P, state: S): any;
+        buildTemplateProps(props: P, state?: S): Promise<{
+            props: P;
+            state: S;
+            templateProps: T;
+        }>;
     }
     export = Aggregator;
 }

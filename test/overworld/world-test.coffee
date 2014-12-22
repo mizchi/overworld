@@ -12,7 +12,7 @@ describe "lib/overworld/world", ->
       html = React.renderToString world.render(body: 'foo')
       equal $(html)('.test').text(), 'foo'
 
-  describe 'Aggregator', ->
+  describe '@aggregator', ->
     class Test2 extends World
       @component: React.createClass
         render: ->
@@ -20,10 +20,15 @@ describe "lib/overworld/world", ->
 
       @aggregator: (pipe) ->
         pipe
-          .on 'init', (props) -> {id: 'foo'}
-          .on 'aggregate', (props, state) -> {body: state.id}
+          .on 'initState', (props) -> {y: 'y'}
+          .on 'aggregate', (props, state) -> {
+            propX: props.x
+            stateY: state.y
+            templateZ: 'z'
+          }
 
-    it "should render element", ->
+    it "should render element", (done) ->
       world = new Test2
-      # html = React.renderToString world.render(body: 'foo')
-      # equal $(html)('.test').text(), 'foo'
+      world.aggregator.buildTemplateProps({x: 'x'}, {y: 'y'}).then (params) ->
+        deepEqual params.templateProps, {propX: 'x', stateY: 'y', templateZ: 'z'}
+        done()

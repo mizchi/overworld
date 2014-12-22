@@ -2,7 +2,7 @@
 global = require 'global'
 global.Promise = require 'bluebird'
 React   = require 'react'
-Overworld = require '../..'
+Overworld = require '../../lib'
 Overworld.setReact React
 
 cnt = 0

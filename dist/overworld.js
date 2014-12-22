@@ -23,15 +23,26 @@ var Aggregator = (function () {
         this._map[eventName] = fn;
         return this;
     };
-    Aggregator.prototype.init = function (props) {
-        if (!this._map.init)
+    Aggregator.prototype.initState = function (props) {
+        if (!this._map.initState)
             throw 'aggregate does not defined';
-        return this._map.init(props);
+        return this._map.initState(props);
     };
     Aggregator.prototype.aggregate = function (props, state) {
         if (!this._map.aggregate)
             throw 'aggregate does not defined';
         return this._map.aggregate(props, state);
+    };
+    Aggregator.prototype.buildTemplateProps = function (props, state) {
+        var _this = this;
+        return new Promise(function (done) {
+            var stateContext = state ? state : _this.initState(props);
+            Promise.resolve(stateContext).then(function (state) {
+                Promise.resolve(_this.aggregate(props, state)).then(function (templateProps) {
+                    done({ props: props, state: state, templateProps: templateProps });
+                });
+            });
+        });
     };
     return Aggregator;
 })();
@@ -52,15 +63,6 @@ module.exports = LifeCycle;
 },{}],4:[function(require,module,exports){
 var utils = require('./utils/utils');
 var LifeCycle = require('./lifecycle');
-function initAggregator(aggregator, props) {
-    return new Promise(function (done) {
-        Promise.resolve(aggregator.init(props)).then(function (state) {
-            Promise.resolve(aggregator.aggregate(props, state)).then(function (templateProps) {
-                done({ props: props, state: state, templateProps: templateProps });
-            });
-        });
-    });
-}
 var Portal = (function () {
     function Portal() {
         this._linkMap = {}; //TODO: valid struct
@@ -122,7 +124,7 @@ var Portal = (function () {
         var _this = this;
         var world = node.instance;
         return new Promise(function (done) {
-            initAggregator(world.aggregator, props).then(function (result) {
+            world.aggregator.buildTemplateProps(world.aggregator, props).then(function (result) {
                 // backdoor initializer
                 world.init(result.props, result.state);
                 world.renderTo(result.templateProps, node.target, component).then(function (mountedComponent) {

@@ -14,14 +14,28 @@ class Aggregator<P, S, T>{
     return this;
   }
 
-  public init(props: P): S{
-    if(!this._map.init) throw 'aggregate does not defined';
-    return this._map.init(props);
+  public initState(props: P): S{
+    if(!this._map.initState) throw 'aggregate does not defined';
+    return this._map.initState(props);
   }
 
   public aggregate(props: P, state: S){
     if(!this._map.aggregate) throw 'aggregate does not defined';
     return this._map.aggregate(props, state);
+  }
+
+  public buildTemplateProps(props: P, state?: S)
+  : Promise<{props: P; state: S; templateProps: T;}>{
+    return new Promise(done => {
+      var stateContext = state ? state : this.initState(props);
+      Promise.resolve(stateContext)
+      .then(state => {
+        Promise.resolve(this.aggregate(props, state))
+        .then(templateProps => {
+          done({props: props, state: state, templateProps: templateProps});
+        });
+      });
+    });
   }
 }
 

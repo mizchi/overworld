@@ -3,7 +3,12 @@ declare class Aggregator<P, S, T> {
     private _map;
     constructor(aggregateFn: any);
     on(eventName: string, fn: Function): Aggregator<P, S, T>;
-    init(props: P): S;
+    initState(props: P): S;
     aggregate(props: P, state: S): any;
+    buildTemplateProps(props: P, state?: S): Promise<{
+        props: P;
+        state: S;
+        templateProps: T;
+    }>;
 }
 export = Aggregator;
