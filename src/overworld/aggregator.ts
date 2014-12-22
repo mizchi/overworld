@@ -19,7 +19,7 @@ class Aggregator<P, S, T>{
     return this._map.initState(props);
   }
 
-  public aggregate(props: P, state: S){
+  public aggregate(props: P, state: S): T{
     if(!this._map.aggregate) throw 'aggregate does not defined';
     return this._map.aggregate(props, state);
   }
