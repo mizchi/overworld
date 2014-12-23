@@ -2,7 +2,7 @@
   "name": "overworld",
   "version": "0.0.1",
   "description": "",
-  "main": "./lib/overworld.js",
+  "main": "./lib/index.js",
   "scripts": {
     "test": "./scripts/test",
     "build": "./scripts/build"
