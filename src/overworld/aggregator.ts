@@ -1,38 +1,35 @@
 // This class is real Aggregator instance
 // but user was given IAggregator
+
+interface IAggregator<P, S, T> {
+  initState(p: P): S | Promise<S> ;
+  aggregate(p: P, s?: S): T | Promise<T>;
+}
+
 class Aggregator<P, S, T>{
-  private _map:any;
-
-  constructor(private aggregateFn: any) {
-    this._map = {};
-    aggregateFn(this);
+  constructor(public aggregator: any) {
+    if(!aggregator.aggregate && aggregator instanceof Function)
+      this.aggregator = new aggregator();
   }
 
-  public on(eventName: string, fn: Function){
-    if(this._map[eventName]) throw 'doubled:'+eventName;
-    this._map[eventName] = fn;
-    return this;
+  public callInitState(props){
+    if(this.aggregator.initState instanceof Function)
+      return this.aggregator.initState(props);
   }
 
-  public initState(props: P): S{
-    if(!this._map.initState) throw 'aggregate does not defined';
-    return this._map.initState(props);
+  public callAggregate(props: P, state?: S){
+    if(!this.aggregator.aggregate) throw 'aggregate does not defined';
+    return this.aggregator.aggregate(props, state);
   }
 
-  public aggregate(props: P, state: S): T{
-    if(!this._map.aggregate) throw 'aggregate does not defined';
-    return this._map.aggregate(props, state);
-  }
-
-  public buildTemplateProps(props: P, state?: S)
+  public buildTemplateProps(props: P, forceState?: S)
   : Promise<{props: P; state: S; templateProps: T;}>{
     return new Promise(done => {
-      var stateContext = state ? state : this.initState(props);
-      Promise.resolve(stateContext)
-      .then(state => {
-        Promise.resolve(this.aggregate(props, state))
-        .then(templateProps => {
-          done({props: props, state: state, templateProps: templateProps});
+      var state = forceState ? forceState : this.callInitState(props);
+      Promise.resolve(state).then(nextState => {
+        var templateProps = this.callAggregate(props, nextState);
+        Promise.resolve(templateProps).then(nextTemplateProps => {
+          done({props: props, state: nextState, templateProps: nextTemplateProps});
         });
       });
     });

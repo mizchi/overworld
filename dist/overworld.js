@@ -107,6 +107,9 @@ var Portal = (function () {
             target.className = name + '-' + uuid;
             this.el.appendChild(target);
         }
+        if (!this._linkMap[name]) {
+            throw name + ' is not linked to any world';
+        }
         var node = {
             type: name,
             uuid: utils.uuid(),

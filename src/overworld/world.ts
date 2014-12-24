@@ -42,10 +42,12 @@ class World {
 
   public update(state){
     this._state = state;
-    var templateProps = this._aggregator.aggregate(this.props, this.state)
-    requestAnimationFrame(() => {
-      this._component.setProps(templateProps)
-      this.emitter.emit(LifeCycle.UPDATED);
+    var templateProps = this._aggregator.buildTemplateProps(this.props, this.state);
+    Promise.resolve(templateProps).then(()=>{
+      requestAnimationFrame((templateProps) => {
+        this._component.setProps(templateProps)
+        this.emitter.emit(LifeCycle.UPDATED);
+      });
     });
   }
 

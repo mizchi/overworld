@@ -17,15 +17,13 @@ describe "lib/overworld/world", ->
       @component: React.createClass
         render: ->
           React.createElement 'div', {key: 'foo', className: 'test', onClick: @onClick}, @props.body
-
-      @aggregator: (pipe) ->
-        pipe
-          .on 'initState', (props) -> {y: 'y'}
-          .on 'aggregate', (props, state) -> {
-            propX: props.x
-            stateY: state.y
-            templateZ: 'z'
-          }
+  
+      @aggregator:
+        initState: (props) -> {y: 'y'}
+        aggregate: (props, state) ->
+          propX: props.x
+          stateY: state.y
+          templateZ: 'z'
 
     it "should render element", (done) ->
       world = new Test2

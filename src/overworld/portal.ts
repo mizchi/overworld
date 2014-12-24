@@ -71,6 +71,10 @@ class Portal {
       this.el.appendChild(target);
     }
 
+    if(!this._linkMap[name]){
+      throw name+' is not linked to any world';
+    }
+
     var node: LinkNode = {
       type: name,
       uuid: utils.uuid(),
@@ -90,7 +94,7 @@ class Portal {
   private renderNode(node: LinkNode, props, component): Promise<any>{
     var world = node.instance;
     return new Promise((done) =>{
-      world.aggregator.buildTemplateProps(world.aggregator, props).then((result) => {
+      world.aggregator.buildTemplateProps(props).then((result) => {
         // backdoor initializer
         world.init(result.props, result.state);
         world.renderTo(result.templateProps, node.target, component).then((mountedComponent)=>{
@@ -110,7 +114,7 @@ class Portal {
   private resumeNode(node: LinkNode): Promise<any>{
     var world = node.instance;
     return new Promise(done => {
-      Promise.resolve(world.aggregator.aggregate(world.props, world.state))
+      Promise.resolve(world.aggregator.buildTemplateProps(world.props, world.state))
       .then(templateProps => {
         var component = this._caches[node.type].component;
         world.renderTo(templateProps, node.target, component).then((mountedComponent) =>{
