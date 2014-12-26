@@ -23,19 +23,19 @@ class Portal {
   public el: HTMLElement;
   private _nodes: LinkNode[];
   private _cursor: number;
-  private _activeNode: LinkNode;
 
   constructor(){
     this._linkMap = {}; //TODO: valid struct
     this._caches = {};
     this._nodes = [];
-    this._activeNode = null;
     this._cursor = 0;
   }
 
+  private get activeNode():LinkNode {return this._nodes[this._cursor];}
+
   // for mixin
   getActiveEmitter(){
-    return this._activeNode.instance.emitter;
+    return this.activeNode.instance.emitter;
   }
 
   public link(name, world){
@@ -46,7 +46,7 @@ class Portal {
   private buildLinkNode(name, forceCreate: boolean = false)
   : Promise<{node: LinkNode; cache?: Cache;}>{
     var React = utils.getReact();
-    var lastNode: LinkNode = this._activeNode;
+    var lastNode: LinkNode = this.activeNode;
     if(lastNode){
       //TODO: remove all
       lastNode.target.style.display = 'none';
@@ -139,7 +139,6 @@ class Portal {
         var component = nodeWithCache.cache ? nodeWithCache.cache.component : null;
 
         this._cursor = 0;
-        this._activeNode = node;
         this._nodes.push(node);
         this.renderNode(node, props, component).then(done);
       });
@@ -167,8 +166,6 @@ class Portal {
           this._nodes.length = this._cursor;
           this._nodes.push(node);
         }
-        this._activeNode = node;
-
         this.renderNode(node, props, component).then(done);
       });
     });
@@ -176,7 +173,7 @@ class Portal {
 
   public popWorld(resumeParams: any = {}){
     // TODO: cache next node and reuse instance
-    var lastNode = this._activeNode;
+    var lastNode = this.activeNode;
     if(lastNode){
       //TODO: remove all
       lastNode.target.style.display = 'none';
@@ -185,7 +182,6 @@ class Portal {
 
     this._cursor--;
     var node = this._nodes[this._cursor];
-    this._activeNode = node;
     return new Promise((done) => {
       if(node) {
         this.resumeNode(node).then(()=>{

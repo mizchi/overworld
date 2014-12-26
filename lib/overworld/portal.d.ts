@@ -4,8 +4,8 @@ declare class Portal {
     el: HTMLElement;
     private _nodes;
     private _cursor;
-    private _activeNode;
     constructor();
+    private activeNode;
     getActiveEmitter(): any;
     link(name: any, world: any): void;
     private buildLinkNode(name, forceCreate?);

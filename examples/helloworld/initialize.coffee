@@ -2,7 +2,7 @@
 global = require 'global'
 global.Promise = require 'bluebird'
 React   = require 'react'
-Overworld = require '../..'
+Overworld = require '../../lib/'
 Overworld.setReact React
 
 window.portal = null
@@ -20,14 +20,14 @@ class HelloWorld extends Overworld.World
         React.createElement 'p', {key: '2'}, @props.body
       ]
 
-  @aggregator: (pipe) ->
-    pipe
-    .on 'initState', (props) -> {id: 'initial'}
-    .on 'aggregate', (props, state) -> {body: 'body of '+state.id}
+  @aggregator:
+    initState: (props) -> {id: 'initial'}
+    aggregate: (props, state) -> {body: 'body of '+state.id}
 
   @subscriber: (subscribe) ->
-    subscribe 'main:update', (update) -> (id) ->
-      update {id: id}
+    subscribe 'main:update', (context) -> (id) ->
+      console.log 'subbed', id, context.props, context.state
+      context.update {id: id}
 
 window.portal = new Overworld.Portal
 portal.link 'hello', HelloWorld

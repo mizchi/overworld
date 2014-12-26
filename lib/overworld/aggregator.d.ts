@@ -1,8 +1,9 @@
+import IAggregator = require('./interfaces/aggregator');
 declare class Aggregator<P, S, T> {
-    aggregator: any;
+    aggregator: IAggregator<P, S, T>;
     constructor(aggregator: any);
-    callInitState(props: any): any;
-    callAggregate(props: P, state?: S): any;
+    private callInitState(props);
+    private callAggregate(props, state?);
     buildTemplateProps(props: P, forceState?: S): Promise<{
         props: P;
         state: S;

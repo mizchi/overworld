@@ -12,34 +12,29 @@ exports.setReact = exports.utils.setReact;
 // This class is real Aggregator instance
 // but user was given IAggregator
 var Aggregator = (function () {
-    function Aggregator(aggregateFn) {
-        this.aggregateFn = aggregateFn;
-        this._map = {};
-        aggregateFn(this);
+    function Aggregator(aggregator) {
+        if (!aggregator.aggregate && aggregator instanceof Function)
+            this.aggregator = new aggregator();
+        else
+            this.aggregator = aggregator;
     }
-    Aggregator.prototype.on = function (eventName, fn) {
-        if (this._map[eventName])
-            throw 'doubled:' + eventName;
-        this._map[eventName] = fn;
-        return this;
+    Aggregator.prototype.callInitState = function (props) {
+        if (this.aggregator.initState instanceof Function)
+            return this.aggregator.initState(props);
     };
-    Aggregator.prototype.initState = function (props) {
-        if (!this._map.initState)
+    Aggregator.prototype.callAggregate = function (props, state) {
+        if (!this.aggregator.aggregate)
             throw 'aggregate does not defined';
-        return this._map.initState(props);
+        return this.aggregator.aggregate(props, state);
     };
-    Aggregator.prototype.aggregate = function (props, state) {
-        if (!this._map.aggregate)
-            throw 'aggregate does not defined';
-        return this._map.aggregate(props, state);
-    };
-    Aggregator.prototype.buildTemplateProps = function (props, state) {
+    Aggregator.prototype.buildTemplateProps = function (props, forceState) {
         var _this = this;
         return new Promise(function (done) {
-            var stateContext = state ? state : _this.initState(props);
-            Promise.resolve(stateContext).then(function (state) {
-                Promise.resolve(_this.aggregate(props, state)).then(function (templateProps) {
-                    done({ props: props, state: state, templateProps: templateProps });
+            var state = forceState ? forceState : _this.callInitState(props);
+            Promise.resolve(state).then(function (nextState) {
+                var templateProps = _this.callAggregate(props, nextState);
+                Promise.resolve(templateProps).then(function (nextTemplateProps) {
+                    done({ props: props, state: nextState, templateProps: nextTemplateProps });
                 });
             });
         });
@@ -127,7 +122,7 @@ var Portal = (function () {
         var _this = this;
         var world = node.instance;
         return new Promise(function (done) {
-            world.aggregator.buildTemplateProps(world.aggregator, props).then(function (result) {
+            world.aggregator.buildTemplateProps(props).then(function (result) {
                 // backdoor initializer
                 world.init(result.props, result.state);
                 world.renderTo(result.templateProps, node.target, component).then(function (mountedComponent) {
@@ -147,7 +142,7 @@ var Portal = (function () {
         var _this = this;
         var world = node.instance;
         return new Promise(function (done) {
-            Promise.resolve(world.aggregator.aggregate(world.props, world.state)).then(function (templateProps) {
+            Promise.resolve(world.aggregator.buildTemplateProps(world.props, world.state)).then(function (templateProps) {
                 var component = _this._caches[node.type].component;
                 world.renderTo(templateProps, node.target, component).then(function (mountedComponent) {
                     node.target.style.display = 'block';
@@ -312,7 +307,9 @@ var utils = require('./utils/utils');
 var Aggregator = require('./aggregator');
 var LifeCycle = require('./lifecycle');
 var subscribe = function (world) {
+    debugger;
     return function (eventName, fn) {
+        debugger;
         world.emitter.on(eventName, fn(world.update.bind(world), world.props, world.state));
     };
 };
@@ -356,10 +353,12 @@ var World = (function () {
     World.prototype.update = function (state) {
         var _this = this;
         this._state = state;
-        var templateProps = this._aggregator.aggregate(this.props, this.state);
-        requestAnimationFrame(function () {
-            _this._component.setProps(templateProps);
-            _this.emitter.emit(LifeCycle.UPDATED);
+        var templateProps = this._aggregator.buildTemplateProps(this.props, this.state);
+        Promise.resolve(templateProps).then(function () {
+            requestAnimationFrame(function (templateProps) {
+                _this._component.setProps(templateProps);
+                _this.emitter.emit(LifeCycle.UPDATED);
+            });
         });
     };
     Object.defineProperty(World.prototype, "aggregator", {
@@ -412,8 +411,9 @@ var World = (function () {
             this._aggregator = new Aggregator(aggregator);
         //subscribe
         this._subscriber = self.constructor.subscriber;
-        if (this._subscriber)
+        if (this._subscriber) {
             this._subscriber(subscribe(this));
+        }
     };
     return World;
 })();

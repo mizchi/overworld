@@ -70,17 +70,24 @@ declare module '__Overworld/overworld/world' {
 }
 
 declare module '__Overworld/overworld/aggregator' {
+    import IAggregator = require('__Overworld/overworld/interfaces/aggregator');
     class Aggregator<P, S, T> {
-        constructor(aggregateFn: any);
-        on(eventName: string, fn: Function): Aggregator<P, S, T>;
-        initState(props: P): S;
-        aggregate(props: P, state: S): T;
-        buildTemplateProps(props: P, state?: S): Promise<{
+        aggregator: IAggregator<P, S, T>;
+        constructor(aggregator: any);
+        buildTemplateProps(props: P, forceState?: S): Promise<{
             props: P;
             state: S;
             templateProps: T;
         }>;
     }
     export = Aggregator;
+}
+
+declare module '__Overworld/overworld/interfaces/aggregator' {
+    interface IAggregator<P, S, T> {
+        initState?(props: P): Promise<S> | S;
+        aggregate(props: P, state: S): Promise<T> | T;
+    }
+    export = IAggregator;
 }
 

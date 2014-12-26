@@ -1,3 +1,5 @@
+export declare var mixinAliasMap: {};
+export declare function aliasForMixin(key: any, instance: any): any;
 export declare function setReact(react: any): any;
 export declare function getReact(): any;
 export declare function setImmutable(imm: any): any;

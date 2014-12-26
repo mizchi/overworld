@@ -3,9 +3,10 @@ import Aggregator = require('./aggregator');
 import Emittable = require('./interfaces/emittable')
 import LifeCycle = require('./lifecycle');
 
-var subscribe: (world: World) => any = (world) => {
-  return (eventName: string, fn: (update: Function, props?: any, state?: any) => (...args: any[]) => void) => {
-    world.emitter.on(eventName, fn(world.update.bind(world), world.props, world.state));
+var subscribe: (world: World) => any
+= (world) => {
+  return (eventName: string, fn: (world: World, props?: any, state?:any) => (...args: any[]) => void) => {
+    world.emitter.on(eventName, fn(world, world.props, world.state));
   }
 };
 
@@ -42,10 +43,11 @@ class World {
 
   public update(state){
     this._state = state;
-    var templateProps = this._aggregator.buildTemplateProps(this.props, this.state);
-    Promise.resolve(templateProps).then(()=>{
-      requestAnimationFrame((templateProps) => {
-        this._component.setProps(templateProps)
+    var build = this._aggregator.buildTemplateProps(this.props, this.state);
+
+    Promise.resolve(build).then((params)=>{
+      requestAnimationFrame(() => {
+        this._component.setProps(params.templateProps)
         this.emitter.emit(LifeCycle.UPDATED);
       });
     });
@@ -101,10 +103,11 @@ class World {
       this._aggregator = new Aggregator(aggregator);
 
     //subscribe
-    this._subscriber = self.constructor.subscriber;
-
-    if(this._subscriber)
+    var subscriber = self.constructor.subscriber;
+    if(subscriber) {
+      this._subscriber = subscriber;
       this._subscriber( subscribe(this) );
+    }
   }
 }
 

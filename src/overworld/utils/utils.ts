@@ -4,6 +4,13 @@ var EventEmitter = require('eventemitter2');
 type EventEmitter = EventEmitter2;
 if(EventEmitter.EventEmitter2) EventEmitter = EventEmitter.EventEmitter2;
 
+// alias map
+
+export var mixinAliasMap = {};
+export function aliasForMixin(key, instance): any {
+  mixinAliasMap[key] = instance;
+}
+
 export function setReact(react): any {
   _react = react;
 }
@@ -29,7 +36,8 @@ export function createContainer(): any {
 }
 
 export function createEmitter(): any {
-  return new EventEmitter({wildcard: true, delimiter: ':'});
+  return new EventEmitter();
+  /*return new EventEmitter({wildcard: true, delimiter: ':'});*/
 }
 
 export function uuid(): string {
