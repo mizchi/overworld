@@ -131,6 +131,12 @@ class Portal {
 
   // swap root
   public transition(name, props): Promise<any>{
+    var lastNode = this.activeNode;
+    if(lastNode){
+      //TODO: remove all
+      lastNode.target.style.display = 'none';
+      lastNode.instance.pause();
+    }
     //TODO: dispose correctly
     this._nodes.length = 0;
     return new Promise((done)=>{
@@ -146,6 +152,13 @@ class Portal {
   }
 
   public pushWorld(name, props){
+    var lastNode = this.activeNode;
+    if(lastNode){
+      //TODO: remove all
+      lastNode.target.style.display = 'none';
+      lastNode.instance.pause();
+    }
+
     return new Promise((done)=>{
       this.buildLinkNode(name).then((nodeWithCache) =>{
         var node = nodeWithCache.node;

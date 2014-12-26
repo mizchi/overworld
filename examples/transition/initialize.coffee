@@ -19,10 +19,9 @@ class MainWorld extends Overworld.World
         React.createElement 'button', {key: 'tosub', onClick: @onClick}, 'transition sub'
       ]
 
-  @aggregator: (pipe) ->
-    pipe
-    .on 'initState', (props) -> {}
-    .on 'aggregate', (props, state) -> {}
+  @aggregator:
+    initState: (props) -> {}
+    aggregate: (props, state) -> {}
 
   @subscriber: (subscribe) ->
     subscribe 'main:transitionToSub', -> (id) ->
@@ -46,10 +45,9 @@ class SubWorld extends Overworld.World
         React.createElement 'button', {key: 'tomain', onClick: @onClick}, 'transition main'
       ]
 
-  @aggregator: (pipe) ->
-    pipe
-    .on 'initState', (props) -> {}
-    .on 'aggregate', (props, state) -> {}
+  @aggregator:
+    initState: (props) -> {}
+    aggregate: (props, state) -> {}
 
   @subscriber: (subscribe) ->
     subscribe 'sub:transitionToMain', -> (id) ->
