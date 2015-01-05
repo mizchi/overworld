@@ -41,11 +41,18 @@ class World {
     this._props = props;
   }
 
-  public update(state){
+  public update(updater: any){
+    var state;
+    if(update instanceof Function) {
+      state = updater(this._state);
+    } else {
+      state = updater;
+    }
+    
     this._state = state;
-    var build = this._aggregator.buildTemplateProps(this.props, this.state);
+    var building = this._aggregator.buildTemplateProps(this.props, this.state);
 
-    Promise.resolve(build).then((params)=>{
+    Promise.resolve(building).then((params)=>{
       requestAnimationFrame(() => {
         this._component.setProps(params.templateProps)
         this.emitter.emit(LifeCycle.UPDATED);
@@ -73,7 +80,6 @@ class World {
       if(component) {
         this._component = component;
         this._component.setProps(templateProps, () => {
-          this.emitter.emit(LifeCycle.RESUMED);
           done(component)
         });
       } else {
