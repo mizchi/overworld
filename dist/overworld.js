@@ -1,15 +1,12 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Overworld=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 ///<reference path='../typings/bundle.d.ts' />
 exports.utils = require('./overworld/utils/utils');
-exports.mixinFor = require('./overworld/utils/mixin-for');
 exports.Emittable = require('./overworld/utils/emittable');
 exports.Portal = require('./overworld/portal');
 exports.World = require('./overworld/world');
 exports.setReact = exports.utils.setReact;
-exports.aliasForMixin = exports.utils.aliasForMixin;
-exports.mixinAliasMap = exports.utils.mixinAliasMap;
 
-},{"./overworld/portal":4,"./overworld/utils/emittable":5,"./overworld/utils/mixin-for":6,"./overworld/utils/utils":7,"./overworld/world":8}],2:[function(require,module,exports){
+},{"./overworld/portal":4,"./overworld/utils/emittable":5,"./overworld/utils/utils":6,"./overworld/world":7}],2:[function(require,module,exports){
 // This class is real Aggregator instance
 // but user was given IAggregator
 var Aggregator = (function () {
@@ -249,7 +246,7 @@ var Portal = (function () {
 })();
 module.exports = Portal;
 
-},{"./lifecycle":3,"./utils/utils":7}],5:[function(require,module,exports){
+},{"./lifecycle":3,"./utils/utils":6}],5:[function(require,module,exports){
 var Emittable = {
     emit: function (eventName) {
         var args = [];
@@ -266,56 +263,27 @@ var Emittable = {
 module.exports = Emittable;
 
 },{}],6:[function(require,module,exports){
-var utils = require('./utils');
-function mixinFor(portal) {
-    return {
-        emit: function (eventName) {
-            var args = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args[_i - 1] = arguments[_i];
-            }
-            if ((typeof portal) === 'string') {
-                if (!utils.mixinAliasMap[portal])
-                    throw portal + 'is unknown';
-                portal = utils.mixinAliasMap[portal];
-            }
-            else if (portal instanceof Function)
-                portal = portal();
-            var emitter = portal.getActiveEmitter();
-            emitter.emit.apply(emitter, [eventName].concat(args));
-        }
-    };
-}
-module.exports = mixinFor;
-
-},{"./utils":7}],7:[function(require,module,exports){
 var _react;
 var _immutable;
 var EventEmitter = require('eventemitter2');
 if (EventEmitter.EventEmitter2)
     EventEmitter = EventEmitter.EventEmitter2;
-// alias map
-exports.mixinAliasMap = {};
-function aliasForMixin(key, instance) {
-    exports.mixinAliasMap[key] = instance;
-}
-exports.aliasForMixin = aliasForMixin;
 function setReact(react) {
     _react = react;
 }
 exports.setReact = setReact;
 function getReact() {
-    return _react; //TODO return global react as default
+    if (_react) {
+        return _react;
+    }
+    if (typeof React !== 'undefined') {
+        return React;
+    }
+    else {
+        throw 'Overworld cant reach React';
+    }
 }
 exports.getReact = getReact;
-function setImmutable(imm) {
-    _immutable = imm;
-}
-exports.setImmutable = setImmutable;
-function getImmutable() {
-    return _immutable; //TODO return global react as default
-}
-exports.getImmutable = getImmutable;
 function createContainer() {
     if (typeof window === 'object') {
         return window.document.createElement('div');
@@ -327,27 +295,14 @@ function createContainer() {
 exports.createContainer = createContainer;
 function createEmitter() {
     return new EventEmitter();
-    /*return new EventEmitter({wildcard: true, delimiter: ':'});*/
 }
 exports.createEmitter = createEmitter;
 function uuid() {
     return Date.now().toString() + '-' + (~~(Math.random() * 10000)).toString();
 }
 exports.uuid = uuid;
-/*export function createRootElement() {
-  var React = getReact();
-  return React.createClass({
-    render: function(){
-      if(this.props.scene) {
-        return this.props.scene(this.props.viewmodel);
-      } else {
-        return React.createElement('div', {key: '_none_'});
-      }
-    }
-  });
-}*/
 
-},{"eventemitter2":9}],8:[function(require,module,exports){
+},{"eventemitter2":8}],7:[function(require,module,exports){
 var utils = require('./utils/utils');
 var Aggregator = require('./aggregator');
 var LifeCycle = require('./lifecycle');
@@ -477,7 +432,7 @@ var World = (function () {
 })();
 module.exports = World;
 
-},{"./aggregator":2,"./lifecycle":3,"./utils/utils":7}],9:[function(require,module,exports){
+},{"./aggregator":2,"./lifecycle":3,"./utils/utils":6}],8:[function(require,module,exports){
 /*!
  * EventEmitter2
  * https://github.com/hij1nx/EventEmitter2
