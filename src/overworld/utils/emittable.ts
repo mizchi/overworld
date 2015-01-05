@@ -1,4 +1,3 @@
-import World = require('../world');
 import utils = require('./utils');
 export = Emittable;
 

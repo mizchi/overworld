@@ -1,4 +1,4 @@
-import World = require('./world');
+import Context = require('./context');
 import utils = require('./utils/utils');
 import Aggregator = require('./aggregator');
 import LifeCycle = require('./lifecycle');
@@ -6,7 +6,7 @@ import LifeCycle = require('./lifecycle');
 interface LinkNode {
   type: string;
   uuid: string;
-  instance: World;
+  instance: Context;
   target: any;
 }
 
@@ -17,7 +17,7 @@ interface Cache {
 }
 
 class Portal {
-  _linkMap: any; // string => typeof World
+  _linkMap: any; // string => typeof Context
   _caches: any; // string => React.Component
 
   public el: HTMLElement;
@@ -151,7 +151,7 @@ class Portal {
     });
   }
 
-  public pushWorld(name, props){
+  public pushScene(name, props){
     var lastNode = this.activeNode;
     if(lastNode){
       //TODO: remove all
@@ -184,7 +184,7 @@ class Portal {
     });
   }
 
-  public popWorld(resumeParams: any = {}){
+  public popScene(resumeParams: any = {}){
     // TODO: cache next node and reuse instance
     var lastNode = this.activeNode;
     if(lastNode){

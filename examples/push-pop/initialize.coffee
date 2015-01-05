@@ -8,7 +8,7 @@ Overworld.setReact React
 cnt = 0
 window.portal = new Overworld.Portal()
 
-class MainWorld extends Overworld.World
+class MainContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(() => portal)]
     onClick: ->
@@ -33,10 +33,10 @@ class MainWorld extends Overworld.World
 
   @subscriber: (subscribe) ->
     subscribe 'main:transitionToSub', -> (id) ->
-      portal.pushWorld('sub', {cnt: cnt++})
+      portal.pushScene('sub', {cnt: cnt++})
 
     subscribe 'main:back', -> (id) ->
-      portal.popWorld()
+      portal.popScene()
 
     subscribe 'lifecycle:created', -> ->
       console.log 'lifecycle:created of main'
@@ -47,7 +47,7 @@ class MainWorld extends Overworld.World
     subscribe 'lifecycle:resumed', -> ->
       console.log 'lifecycle:resumed of main'
 
-class SubWorld extends Overworld.World
+class SubContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(()=> portal)]
     onClick: ->
@@ -71,13 +71,13 @@ class SubWorld extends Overworld.World
 
   @subscriber: (subscribe) ->
     subscribe 'sub:transitionToMain', -> (id) ->
-      portal.pushWorld('main', {cnt: cnt++})
+      portal.pushScene('main', {cnt: cnt++})
 
     subscribe 'main:back', -> (id) ->
-      portal.popWorld()
+      portal.popScene()
 
-portal.link 'main', MainWorld
-portal.link 'sub', SubWorld
+portal.link 'main', MainContext
+portal.link 'sub', SubContext
 
 window.addEventListener 'load', ->
   portal.mount(document.body);

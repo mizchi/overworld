@@ -7,7 +7,7 @@ Overworld.setReact React
 
 window.portal = null
 
-class MainWorld extends Overworld.World
+class MainContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(-> portal)]
     onClick: ->
@@ -33,7 +33,7 @@ class MainWorld extends Overworld.World
     subscribe 'lifecycle:paused', -> (id) ->
       console.log 'paused'
 
-class SubWorld extends Overworld.World
+class SubContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(-> portal)]
     onClick: ->
@@ -55,7 +55,7 @@ class SubWorld extends Overworld.World
 
 window.portal = new Overworld.Portal()
 window.addEventListener 'load', ->
-  portal.link 'main', MainWorld
-  portal.link 'sub', SubWorld
+  portal.link 'main', MainContext
+  portal.link 'sub', SubContext
   portal.mount(document.body)
   portal.transition 'main', {cnt: 0}

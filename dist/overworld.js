@@ -3,10 +3,11 @@
 exports.utils = require('./overworld/utils/utils');
 exports.Emittable = require('./overworld/utils/emittable');
 exports.Portal = require('./overworld/portal');
-exports.World = require('./overworld/world');
+exports.Context = require('./overworld/context');
 exports.setReact = exports.utils.setReact;
+exports.subscriber = function (fn) { return fn; }; // override function type
 
-},{"./overworld/portal":4,"./overworld/utils/emittable":5,"./overworld/utils/utils":6,"./overworld/world":7}],2:[function(require,module,exports){
+},{"./overworld/context":3,"./overworld/portal":5,"./overworld/utils/emittable":6,"./overworld/utils/utils":7}],2:[function(require,module,exports){
 // This class is real Aggregator instance
 // but user was given IAggregator
 var Aggregator = (function () {
@@ -42,6 +43,139 @@ var Aggregator = (function () {
 module.exports = Aggregator;
 
 },{}],3:[function(require,module,exports){
+var utils = require('./utils/utils');
+var Aggregator = require('./aggregator');
+var LifeCycle = require('./lifecycle');
+var subscribe = function (world) {
+    return function (eventName, fn) {
+        world.emitter.on(eventName, fn(world, world.props, world.state));
+    };
+};
+var Context = (function () {
+    function Context() {
+        this._emitter = utils.createEmitter();
+        this._build();
+    }
+    Object.defineProperty(Context.prototype, "emitter", {
+        get: function () {
+            return this._emitter;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Context.prototype, "props", {
+        get: function () {
+            return this._props;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Context.prototype, "state", {
+        get: function () {
+            return this._state;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Context.prototype, "component", {
+        get: function () {
+            return this._component;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Context.prototype.init = function (props, state) {
+        this._state = state;
+        this._props = props;
+    };
+    Context.prototype.update = function (updater) {
+        var _this = this;
+        var state;
+        if (updater instanceof Function) {
+            state = updater(this._state);
+        }
+        else if (!updater) {
+            state = this._state;
+        }
+        else {
+            state = updater;
+        }
+        this._state = state;
+        var building = this._aggregator.buildTemplateProps(this.props, this.state);
+        Promise.resolve(building).then(function (params) {
+            _this.injectContextProperties(params.templateProps);
+            requestAnimationFrame(function () {
+                _this._component.setProps(params.templateProps);
+                _this.emitter.emit(LifeCycle.UPDATED);
+            });
+        });
+    };
+    Object.defineProperty(Context.prototype, "aggregator", {
+        get: function () {
+            return this._aggregator;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Context.prototype.pause = function () {
+        this.emitter.emit(LifeCycle.PAUSED);
+    };
+    Context.prototype.resume = function () {
+        this.emitter.emit(LifeCycle.RESUMED);
+    };
+    Context.prototype.dispose = function () {
+        this.emitter.emit(LifeCycle.DISPOSED);
+    };
+    Context.prototype.injectContextProperties = function (templateProps) {
+        var t = templateProps;
+        t.emitter = this._emitter;
+        return templateProps;
+    };
+    Context.prototype.renderTo = function (templateProps, el, component) {
+        var _this = this;
+        var React = utils.getReact();
+        templateProps.emitter = this._emitter;
+        this.injectContextProperties(templateProps);
+        return new Promise(function (done) {
+            if (component) {
+                _this._component = component;
+                _this._component.setProps(templateProps, function () {
+                    done(component);
+                });
+            }
+            else {
+                var view = _this.render(templateProps);
+                _this._component = React.render(view, el);
+                _this.emitter.emit(LifeCycle.MOUNTED);
+                done(_this._component);
+            }
+        });
+    };
+    Context.prototype.render = function (templateProps) {
+        var React = utils.getReact();
+        return this._rootElement(templateProps);
+    };
+    Context.prototype._build = function () {
+        var React = utils.getReact();
+        var self = this;
+        //component
+        this._rootElement = React.createFactory(self.constructor.component);
+        //aggregator
+        var aggregator = self.constructor.aggregator;
+        if (aggregator)
+            this._aggregator = new Aggregator(aggregator);
+        //subscribe
+        var subscriber = self.constructor.subscriber;
+        if (subscriber) {
+            this._subscriber = subscriber;
+            this._subscriber(subscribe(this));
+        }
+    };
+    return Context;
+})();
+module.exports = Context;
+
+},{"./aggregator":2,"./lifecycle":4,"./utils/utils":7}],4:[function(require,module,exports){
 var LifeCycle = {
     CREATED: 'lifecycle:created',
     UPDATED: 'lifecycle:updated',
@@ -53,7 +187,7 @@ var LifeCycle = {
 };
 module.exports = LifeCycle;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var utils = require('./utils/utils');
 var LifeCycle = require('./lifecycle');
 var Portal = (function () {
@@ -179,7 +313,7 @@ var Portal = (function () {
             });
         });
     };
-    Portal.prototype.pushWorld = function (name, props) {
+    Portal.prototype.pushScene = function (name, props) {
         var _this = this;
         var lastNode = this.activeNode;
         if (lastNode) {
@@ -211,7 +345,7 @@ var Portal = (function () {
             });
         });
     };
-    Portal.prototype.popWorld = function (resumeParams) {
+    Portal.prototype.popScene = function (resumeParams) {
         var _this = this;
         if (resumeParams === void 0) { resumeParams = {}; }
         // TODO: cache next node and reuse instance
@@ -246,7 +380,7 @@ var Portal = (function () {
 })();
 module.exports = Portal;
 
-},{"./lifecycle":3,"./utils/utils":6}],5:[function(require,module,exports){
+},{"./lifecycle":4,"./utils/utils":7}],6:[function(require,module,exports){
 var Emittable = {
     emit: function (eventName) {
         var args = [];
@@ -262,7 +396,7 @@ var Emittable = {
 };
 module.exports = Emittable;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var _react;
 var _immutable;
 var EventEmitter = require('eventemitter2');
@@ -302,137 +436,7 @@ function uuid() {
 }
 exports.uuid = uuid;
 
-},{"eventemitter2":8}],7:[function(require,module,exports){
-var utils = require('./utils/utils');
-var Aggregator = require('./aggregator');
-var LifeCycle = require('./lifecycle');
-var subscribe = function (world) {
-    return function (eventName, fn) {
-        world.emitter.on(eventName, fn(world, world.props, world.state));
-    };
-};
-var World = (function () {
-    function World() {
-        this._emitter = utils.createEmitter();
-        this._build();
-    }
-    Object.defineProperty(World.prototype, "emitter", {
-        get: function () {
-            return this._emitter;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(World.prototype, "props", {
-        get: function () {
-            return this._props;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(World.prototype, "state", {
-        get: function () {
-            return this._state;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(World.prototype, "component", {
-        get: function () {
-            return this._component;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    World.prototype.init = function (props, state) {
-        this._state = state;
-        this._props = props;
-    };
-    World.prototype.update = function (updater) {
-        var _this = this;
-        var state;
-        if (updater instanceof Function) {
-            state = updater(this._state);
-        }
-        else {
-            state = updater;
-        }
-        this._state = state;
-        var building = this._aggregator.buildTemplateProps(this.props, this.state);
-        Promise.resolve(building).then(function (params) {
-            _this.injectContextProperties(params.templateProps);
-            requestAnimationFrame(function () {
-                _this._component.setProps(params.templateProps);
-                _this.emitter.emit(LifeCycle.UPDATED);
-            });
-        });
-    };
-    Object.defineProperty(World.prototype, "aggregator", {
-        get: function () {
-            return this._aggregator;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    World.prototype.pause = function () {
-        this.emitter.emit(LifeCycle.PAUSED);
-    };
-    World.prototype.resume = function () {
-        this.emitter.emit(LifeCycle.RESUMED);
-    };
-    World.prototype.dispose = function () {
-        this.emitter.emit(LifeCycle.DISPOSED);
-    };
-    World.prototype.injectContextProperties = function (templateProps) {
-        var t = templateProps;
-        t.emitter = this._emitter;
-        return templateProps;
-    };
-    World.prototype.renderTo = function (templateProps, el, component) {
-        var _this = this;
-        var React = utils.getReact();
-        templateProps.emitter = this._emitter;
-        this.injectContextProperties(templateProps);
-        return new Promise(function (done) {
-            if (component) {
-                _this._component = component;
-                _this._component.setProps(templateProps, function () {
-                    done(component);
-                });
-            }
-            else {
-                var view = _this.render(templateProps);
-                _this._component = React.render(view, el);
-                _this.emitter.emit(LifeCycle.MOUNTED);
-                done(_this._component);
-            }
-        });
-    };
-    World.prototype.render = function (templateProps) {
-        var React = utils.getReact();
-        return this._rootElement(templateProps);
-    };
-    World.prototype._build = function () {
-        var React = utils.getReact();
-        var self = this;
-        //component
-        this._rootElement = React.createFactory(self.constructor.component);
-        //aggregator
-        var aggregator = self.constructor.aggregator;
-        if (aggregator)
-            this._aggregator = new Aggregator(aggregator);
-        //subscribe
-        var subscriber = self.constructor.subscriber;
-        if (subscriber) {
-            this._subscriber = subscriber;
-            this._subscriber(subscribe(this));
-        }
-    };
-    return World;
-})();
-module.exports = World;
-
-},{"./aggregator":2,"./lifecycle":3,"./utils/utils":6}],8:[function(require,module,exports){
+},{"eventemitter2":8}],8:[function(require,module,exports){
 /*!
  * EventEmitter2
  * https://github.com/hij1nx/EventEmitter2

@@ -1,8 +1,8 @@
 require '../spec-helper'
-World = require '../../lib/overworld/world'
-describe "lib/overworld/world", ->
+Context = require '../../lib/overworld/context'
+describe "lib/overworld/context", ->
   describe '#render', ->
-    class Test1 extends World
+    class Test1 extends Context
       @component: React.createClass
         render: ->
           React.createElement 'div', {key: 'foo', className: 'test', onClick: @onClick}, @props.body
@@ -13,11 +13,11 @@ describe "lib/overworld/world", ->
       equal $(html)('.test').text(), 'foo'
 
   describe '@aggregator', ->
-    class Test2 extends World
+    class Test2 extends Context
       @component: React.createClass
         render: ->
           React.createElement 'div', {key: 'foo', className: 'test', onClick: @onClick}, @props.body
-  
+
       @aggregator:
         initState: (props) -> {y: 'y'}
         aggregate: (props, state) ->

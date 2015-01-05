@@ -3,7 +3,7 @@
 declare module Overworld {
   export class Portal {
   }
-  export class World {
+  export class Context {
   }
   export var setReact: any;
   export var mixinFor: any;
@@ -20,7 +20,7 @@ Overworld.setReact(React);
 declare var portal;
 global.portal = new Overworld.Portal
 
-class HelloWorld extends Overworld.World {
+class HelloContext extends Overworld.Context {
   static component = React.createClass({
     mixins: [Overworld.mixinFor( ()=> portal)],
     onClick: function(){this.emit('main:update', Date.now().toString());},
@@ -43,7 +43,7 @@ class HelloWorld extends Overworld.World {
   }
 }
 
-portal.link('hello', HelloWorld);
+portal.link('hello', HelloContext);
 window.addEventListener('load', () => {
   portal.mount(document.body);
   portal.transition('hello', {id: 'foo'});

@@ -40,7 +40,7 @@ Overworld = require 'overworld'
 Overworld.setReact React
 window.portal = null
 
-class HelloWorld extends Overworld.World
+class HelloContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(-> portal)]
     onClick: ->
@@ -63,7 +63,7 @@ class HelloWorld extends Overworld.World
       update {timestamp}
 
 window.portal = new Overworld.Portal
-portal.link 'hello', HelloWorld
+portal.link 'hello', HelloContext
 
 window.addEventListener 'load', ->
   portal.mount(document.body)
@@ -86,7 +86,7 @@ WIP
 - `Aggregator.prototype.on('initState', (props: Props) => State | Promise<State>);`
 - `Aggregator.prototype.on('aggregate', (props: Props, state: State) => TemplateProps | Promise<TemplateProps>); `
 
-## World LifeCycle
+## Context LifeCycle
 
 - CREATED
 - PAUSED

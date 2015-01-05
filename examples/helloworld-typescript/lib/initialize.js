@@ -12,12 +12,12 @@ global.Overworld = require('../../../lib');
 var React = require('react');
 Overworld.setReact(React);
 global.portal = new Overworld.Portal;
-var HelloWorld = (function (_super) {
-    __extends(HelloWorld, _super);
-    function HelloWorld() {
+var HelloContext = (function (_super) {
+    __extends(HelloContext, _super);
+    function HelloContext() {
         _super.apply(this, arguments);
     }
-    HelloWorld.component = React.createClass({
+    HelloContext.component = React.createClass({
         mixins: [Overworld.mixinFor(function () { return portal; })],
         onClick: function () {
             this.emit('main:update', Date.now().toString());
@@ -30,16 +30,16 @@ var HelloWorld = (function (_super) {
             ]);
         }
     });
-    HelloWorld.aggregator = function (pipe) {
+    HelloContext.aggregator = function (pipe) {
         pipe.on('initState', function (props) { return ({ id: 'initial' }); });
         pipe.on('aggregate', function (props, state) { return ({ body: 'body of ' + state.id }); });
     };
-    HelloWorld.subscriber = function (subscribe) {
+    HelloContext.subscriber = function (subscribe) {
         subscribe('main:update', function (update) { return function (id) { return console.log(id); }; });
     };
-    return HelloWorld;
-})(Overworld.World);
-portal.link('hello', HelloWorld);
+    return HelloContext;
+})(Overworld.Context);
+portal.link('hello', HelloContext);
 window.addEventListener('load', function () {
     portal.mount(document.body);
     portal.transition('hello', { id: 'foo' });

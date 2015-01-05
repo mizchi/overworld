@@ -7,7 +7,7 @@ Overworld.setReact React
 
 window.portal = null
 
-class HelloWorld extends Overworld.World
+class HelloContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(-> portal)]
     onClick: ->
@@ -30,7 +30,7 @@ class HelloWorld extends Overworld.World
       context.update {id: id}
 
 window.portal = new Overworld.Portal
-portal.link 'hello', HelloWorld
+portal.link 'hello', HelloContext
 
 window.addEventListener 'load', ->
   portal.mount(document.body)

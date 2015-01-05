@@ -3,14 +3,14 @@ import Aggregator = require('./aggregator');
 import Emittable = require('./interfaces/emittable')
 import LifeCycle = require('./lifecycle');
 
-var subscribe: (world: World) => any
+var subscribe: (world: Context) => any
 = (world) => {
-  return (eventName: string, fn: (world: World, props?: any, state?:any) => (...args: any[]) => void) => {
+  return (eventName: string, fn: (world: Context, props?: any, state?:any) => (...args: any[]) => void) => {
     world.emitter.on(eventName, fn(world, world.props, world.state));
   }
 };
 
-class World {
+class Context {
   static aggregator: any;
   static component: any;
   static subscriber: Function;
@@ -45,6 +45,8 @@ class World {
     var state;
     if(updater instanceof Function) {
       state = updater(this._state);
+    } else if(!updater) {
+      state = this._state;
     } else {
       state = updater;
     }
@@ -127,4 +129,4 @@ class World {
   }
 }
 
-export = World;
+export = Context;

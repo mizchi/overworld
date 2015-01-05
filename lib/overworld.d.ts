@@ -4,8 +4,9 @@ declare module 'Overworld' {
     export import utils = require('__Overworld/overworld/utils/utils');
     export import Emittable = require('__Overworld/overworld/utils/emittable');
     export import Portal = require('__Overworld/overworld/portal');
-    export import World = require('__Overworld/overworld/world');
+    export import Context = require('__Overworld/overworld/context');
     export import setReact = utils.setReact;
+    export var subscriber: (fn: any) => any;
 }
 
 declare module '__Overworld/overworld/utils/utils' {
@@ -33,8 +34,8 @@ declare module '__Overworld/overworld/portal' {
         link(name: any, world: any): void;
         mount(el: any): void;
         transition(name: any, props: any): Promise<any>;
-        pushWorld(name: any, props: any): Promise<{}>;
-        popWorld(resumeParams?: any): Promise<{}>;
+        pushScene(name: any, props: any): Promise<{}>;
+        popScene(resumeParams?: any): Promise<{}>;
         serialize(): {
             props: any;
             state: any;
@@ -44,9 +45,9 @@ declare module '__Overworld/overworld/portal' {
     export = Portal;
 }
 
-declare module '__Overworld/overworld/world' {
+declare module '__Overworld/overworld/context' {
     import Aggregator = require('__Overworld/overworld/aggregator');
-    class World {
+    class Context {
         static aggregator: any;
         static component: any;
         static subscriber: Function;
@@ -64,7 +65,7 @@ declare module '__Overworld/overworld/world' {
         renderTo(templateProps: any, el: any, component?: any): Promise<any>;
         render(templateProps: any): any;
     }
-    export = World;
+    export = Context;
 }
 
 declare module '__Overworld/overworld/aggregator' {

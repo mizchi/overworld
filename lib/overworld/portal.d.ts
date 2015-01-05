@@ -13,8 +13,8 @@ declare class Portal {
     private resumeNode(node);
     mount(el: any): void;
     transition(name: any, props: any): Promise<any>;
-    pushWorld(name: any, props: any): Promise<{}>;
-    popWorld(resumeParams?: any): Promise<{}>;
+    pushScene(name: any, props: any): Promise<{}>;
+    popScene(resumeParams?: any): Promise<{}>;
     serialize(): {
         props: any;
         state: any;

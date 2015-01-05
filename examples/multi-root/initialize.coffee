@@ -9,7 +9,7 @@ window.layout = new Overworld.Portal()
 
 cnt = 0
 
-class MainWorld extends Overworld.World
+class MainContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(() => app)]
     onClick: ->
@@ -34,12 +34,12 @@ class MainWorld extends Overworld.World
 
   @subscriber: (subscribe) ->
     subscribe 'main:transitionToSub', -> (id) ->
-      app.pushWorld('sub', {cnt: cnt++})
+      app.pushScene('sub', {cnt: cnt++})
 
     subscribe 'main:back', -> (id) ->
-      app.popWorld()
+      app.popScene()
 
-class SubWorld extends Overworld.World
+class SubContext extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(()=> app)]
     onClick: ->
@@ -63,12 +63,12 @@ class SubWorld extends Overworld.World
 
   @subscriber: (subscribe) ->
     subscribe 'sub:transitionToMain', -> (id) ->
-      app.pushWorld('main', {cnt: cnt++})
+      app.pushScene('main', {cnt: cnt++})
 
     subscribe 'main:back', -> (id) ->
-      app.popWorld()
+      app.popScene()
 
-class Layout extends Overworld.World
+class Layout extends Overworld.Context
   @component: React.createClass
     mixins: [Overworld.mixinFor(()=> layout)]
     onClick: ->
@@ -90,8 +90,8 @@ class Layout extends Overworld.World
 
   @subscriber: (subscribe) ->
 
-app.link 'main', MainWorld
-app.link 'sub', SubWorld
+app.link 'main', MainContext
+app.link 'sub', SubContext
 
 layout.link 'layout', Layout
 
