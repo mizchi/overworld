@@ -16,11 +16,12 @@ declare class World {
     state: any;
     component: any;
     init(props: any, state: any): void;
-    update(state: any): void;
+    update(updater: any): void;
     aggregator: Aggregator<any, any, any>;
     pause(): void;
     resume(): void;
     dispose(): void;
+    private injectContextProperties(templateProps);
     renderTo(templateProps: any, el: any, component?: any): Promise<any>;
     render(templateProps: any): any;
     private _build();

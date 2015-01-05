@@ -2,13 +2,14 @@
 ///<reference path='../typings/bundle.d.ts' />
 exports.utils = require('./overworld/utils/utils');
 exports.mixinFor = require('./overworld/utils/mixin-for');
+exports.Emittable = require('./overworld/utils/emittable');
 exports.Portal = require('./overworld/portal');
 exports.World = require('./overworld/world');
 exports.setReact = exports.utils.setReact;
-/*import OverworldStatic = require('./overworld/interfaces/overworld');*/
-/*var Overworld:OverworldStatic = {Portal: Portal, World: World, setReact: utils.setReact, mixinFor: mixinFor};*/
+exports.aliasForMixin = exports.utils.aliasForMixin;
+exports.mixinAliasMap = exports.utils.mixinAliasMap;
 
-},{"./overworld/portal":4,"./overworld/utils/mixin-for":5,"./overworld/utils/utils":6,"./overworld/world":7}],2:[function(require,module,exports){
+},{"./overworld/portal":4,"./overworld/utils/emittable":5,"./overworld/utils/mixin-for":6,"./overworld/utils/utils":7,"./overworld/world":8}],2:[function(require,module,exports){
 // This class is real Aggregator instance
 // but user was given IAggregator
 var Aggregator = (function () {
@@ -17,14 +18,14 @@ var Aggregator = (function () {
             this.aggregator = new aggregator();
         else
             this.aggregator = aggregator;
+        if (!this.aggregator.aggregate)
+            throw 'aggregate does not defined';
     }
     Aggregator.prototype.callInitState = function (props) {
         if (this.aggregator.initState instanceof Function)
             return this.aggregator.initState(props);
     };
     Aggregator.prototype.callAggregate = function (props, state) {
-        if (!this.aggregator.aggregate)
-            throw 'aggregate does not defined';
         return this.aggregator.aggregate(props, state);
     };
     Aggregator.prototype.buildTemplateProps = function (props, forceState) {
@@ -63,12 +64,18 @@ var Portal = (function () {
         this._linkMap = {}; //TODO: valid struct
         this._caches = {};
         this._nodes = [];
-        this._activeNode = null;
         this._cursor = 0;
     }
+    Object.defineProperty(Portal.prototype, "activeNode", {
+        get: function () {
+            return this._nodes[this._cursor];
+        },
+        enumerable: true,
+        configurable: true
+    });
     // for mixin
     Portal.prototype.getActiveEmitter = function () {
-        return this._activeNode.instance.emitter;
+        return this.activeNode.instance.emitter;
     };
     Portal.prototype.link = function (name, world) {
         if (this._linkMap[name])
@@ -78,7 +85,7 @@ var Portal = (function () {
     Portal.prototype.buildLinkNode = function (name, forceCreate) {
         if (forceCreate === void 0) { forceCreate = false; }
         var React = utils.getReact();
-        var lastNode = this._activeNode;
+        var lastNode = this.activeNode;
         if (lastNode) {
             //TODO: remove all
             lastNode.target.style.display = 'none';
@@ -157,6 +164,12 @@ var Portal = (function () {
     // swap root
     Portal.prototype.transition = function (name, props) {
         var _this = this;
+        var lastNode = this.activeNode;
+        if (lastNode) {
+            //TODO: remove all
+            lastNode.target.style.display = 'none';
+            lastNode.instance.pause();
+        }
         //TODO: dispose correctly
         this._nodes.length = 0;
         return new Promise(function (done) {
@@ -164,7 +177,6 @@ var Portal = (function () {
                 var node = nodeWithCache.node;
                 var component = nodeWithCache.cache ? nodeWithCache.cache.component : null;
                 _this._cursor = 0;
-                _this._activeNode = node;
                 _this._nodes.push(node);
                 _this.renderNode(node, props, component).then(done);
             });
@@ -172,6 +184,12 @@ var Portal = (function () {
     };
     Portal.prototype.pushWorld = function (name, props) {
         var _this = this;
+        var lastNode = this.activeNode;
+        if (lastNode) {
+            //TODO: remove all
+            lastNode.target.style.display = 'none';
+            lastNode.instance.pause();
+        }
         return new Promise(function (done) {
             _this.buildLinkNode(name).then(function (nodeWithCache) {
                 var node = nodeWithCache.node;
@@ -192,7 +210,6 @@ var Portal = (function () {
                     _this._nodes.length = _this._cursor;
                     _this._nodes.push(node);
                 }
-                _this._activeNode = node;
                 _this.renderNode(node, props, component).then(done);
             });
         });
@@ -201,7 +218,7 @@ var Portal = (function () {
         var _this = this;
         if (resumeParams === void 0) { resumeParams = {}; }
         // TODO: cache next node and reuse instance
-        var lastNode = this._activeNode;
+        var lastNode = this.activeNode;
         if (lastNode) {
             //TODO: remove all
             lastNode.target.style.display = 'none';
@@ -209,7 +226,6 @@ var Portal = (function () {
         }
         this._cursor--;
         var node = this._nodes[this._cursor];
-        this._activeNode = node;
         return new Promise(function (done) {
             if (node) {
                 _this.resumeNode(node).then(function () {
@@ -233,7 +249,24 @@ var Portal = (function () {
 })();
 module.exports = Portal;
 
-},{"./lifecycle":3,"./utils/utils":6}],5:[function(require,module,exports){
+},{"./lifecycle":3,"./utils/utils":7}],5:[function(require,module,exports){
+var Emittable = {
+    emit: function (eventName) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var emitter = this.props.emitter;
+        if (!emitter) {
+            throw 'emitter is undefined';
+        }
+        emitter.emit.apply(emitter, [eventName].concat(args));
+    }
+};
+module.exports = Emittable;
+
+},{}],6:[function(require,module,exports){
+var utils = require('./utils');
 function mixinFor(portal) {
     return {
         emit: function (eventName) {
@@ -241,7 +274,12 @@ function mixinFor(portal) {
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
             }
-            if (portal instanceof Function)
+            if ((typeof portal) === 'string') {
+                if (!utils.mixinAliasMap[portal])
+                    throw portal + 'is unknown';
+                portal = utils.mixinAliasMap[portal];
+            }
+            else if (portal instanceof Function)
                 portal = portal();
             var emitter = portal.getActiveEmitter();
             emitter.emit.apply(emitter, [eventName].concat(args));
@@ -250,12 +288,18 @@ function mixinFor(portal) {
 }
 module.exports = mixinFor;
 
-},{}],6:[function(require,module,exports){
+},{"./utils":7}],7:[function(require,module,exports){
 var _react;
 var _immutable;
 var EventEmitter = require('eventemitter2');
 if (EventEmitter.EventEmitter2)
     EventEmitter = EventEmitter.EventEmitter2;
+// alias map
+exports.mixinAliasMap = {};
+function aliasForMixin(key, instance) {
+    exports.mixinAliasMap[key] = instance;
+}
+exports.aliasForMixin = aliasForMixin;
 function setReact(react) {
     _react = react;
 }
@@ -282,7 +326,8 @@ function createContainer() {
 }
 exports.createContainer = createContainer;
 function createEmitter() {
-    return new EventEmitter({ wildcard: true, delimiter: ':' });
+    return new EventEmitter();
+    /*return new EventEmitter({wildcard: true, delimiter: ':'});*/
 }
 exports.createEmitter = createEmitter;
 function uuid() {
@@ -302,15 +347,13 @@ exports.uuid = uuid;
   });
 }*/
 
-},{"eventemitter2":8}],7:[function(require,module,exports){
+},{"eventemitter2":9}],8:[function(require,module,exports){
 var utils = require('./utils/utils');
 var Aggregator = require('./aggregator');
 var LifeCycle = require('./lifecycle');
 var subscribe = function (world) {
-    debugger;
     return function (eventName, fn) {
-        debugger;
-        world.emitter.on(eventName, fn(world.update.bind(world), world.props, world.state));
+        world.emitter.on(eventName, fn(world, world.props, world.state));
     };
 };
 var World = (function () {
@@ -350,13 +393,21 @@ var World = (function () {
         this._state = state;
         this._props = props;
     };
-    World.prototype.update = function (state) {
+    World.prototype.update = function (updater) {
         var _this = this;
+        var state;
+        if (updater instanceof Function) {
+            state = updater(this._state);
+        }
+        else {
+            state = updater;
+        }
         this._state = state;
-        var templateProps = this._aggregator.buildTemplateProps(this.props, this.state);
-        Promise.resolve(templateProps).then(function () {
-            requestAnimationFrame(function (templateProps) {
-                _this._component.setProps(templateProps);
+        var building = this._aggregator.buildTemplateProps(this.props, this.state);
+        Promise.resolve(building).then(function (params) {
+            _this.injectContextProperties(params.templateProps);
+            requestAnimationFrame(function () {
+                _this._component.setProps(params.templateProps);
                 _this.emitter.emit(LifeCycle.UPDATED);
             });
         });
@@ -377,14 +428,20 @@ var World = (function () {
     World.prototype.dispose = function () {
         this.emitter.emit(LifeCycle.DISPOSED);
     };
+    World.prototype.injectContextProperties = function (templateProps) {
+        var t = templateProps;
+        t.emitter = this._emitter;
+        return templateProps;
+    };
     World.prototype.renderTo = function (templateProps, el, component) {
         var _this = this;
         var React = utils.getReact();
+        templateProps.emitter = this._emitter;
+        this.injectContextProperties(templateProps);
         return new Promise(function (done) {
             if (component) {
                 _this._component = component;
                 _this._component.setProps(templateProps, function () {
-                    _this.emitter.emit(LifeCycle.RESUMED);
                     done(component);
                 });
             }
@@ -410,8 +467,9 @@ var World = (function () {
         if (aggregator)
             this._aggregator = new Aggregator(aggregator);
         //subscribe
-        this._subscriber = self.constructor.subscriber;
-        if (this._subscriber) {
+        var subscriber = self.constructor.subscriber;
+        if (subscriber) {
+            this._subscriber = subscriber;
             this._subscriber(subscribe(this));
         }
     };
@@ -419,7 +477,7 @@ var World = (function () {
 })();
 module.exports = World;
 
-},{"./aggregator":2,"./lifecycle":3,"./utils/utils":6}],8:[function(require,module,exports){
+},{"./aggregator":2,"./lifecycle":3,"./utils/utils":7}],9:[function(require,module,exports){
 /*!
  * EventEmitter2
  * https://github.com/hij1nx/EventEmitter2

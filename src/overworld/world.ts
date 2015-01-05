@@ -43,16 +43,17 @@ class World {
 
   public update(updater: any){
     var state;
-    if(update instanceof Function) {
+    if(updater instanceof Function) {
       state = updater(this._state);
     } else {
       state = updater;
     }
-    
+
     this._state = state;
     var building = this._aggregator.buildTemplateProps(this.props, this.state);
 
     Promise.resolve(building).then((params)=>{
+      this.injectContextProperties(params.templateProps);
       requestAnimationFrame(() => {
         this._component.setProps(params.templateProps)
         this.emitter.emit(LifeCycle.UPDATED);
@@ -74,8 +75,17 @@ class World {
     this.emitter.emit(LifeCycle.DISPOSED);
   }
 
+  private injectContextProperties(templateProps){
+    var t: any = templateProps;
+    t.emitter = this._emitter;
+    return templateProps;
+  }
+
   public renderTo(templateProps, el: any, component?: any): Promise<any> {
     var React = utils.getReact();
+    templateProps.emitter = this._emitter;
+    this.injectContextProperties(templateProps);
+
     return new Promise(done => {
       if(component) {
         this._component = component;

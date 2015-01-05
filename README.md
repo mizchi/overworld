@@ -2,9 +2,12 @@
 
 ![](https://cdn0.iconfinder.com/data/icons/gcons-2/21/world7-512.png)
 
-## CAUTION
+## CAUTION!!
 
 This is under development with dog fooding by myself.
+
+All API is unstable.
+
 
 ## What is this?
 
@@ -76,6 +79,9 @@ WIP
 - Props : immutable params given at initialization
 - State : mutable params created by context
 - TemplateProps : params to be given to Component
+
+
+###
 
 - `Aggregator.prototype.on('initState', (props: Props) => State | Promise<State>);`
 - `Aggregator.prototype.on('aggregate', (props: Props, state: State) => TemplateProps | Promise<TemplateProps>); `

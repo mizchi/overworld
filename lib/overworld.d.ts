@@ -3,12 +3,17 @@
 declare module 'Overworld' {
     export import utils = require('__Overworld/overworld/utils/utils');
     export import mixinFor = require('__Overworld/overworld/utils/mixin-for');
+    export import Emittable = require('__Overworld/overworld/utils/emittable');
     export import Portal = require('__Overworld/overworld/portal');
     export import World = require('__Overworld/overworld/world');
     export import setReact = utils.setReact;
+    export import aliasForMixin = utils.aliasForMixin;
+    export import mixinAliasMap = utils.mixinAliasMap;
 }
 
 declare module '__Overworld/overworld/utils/utils' {
+    export var mixinAliasMap: {};
+    export function aliasForMixin(key: any, instance: any): any;
     export function setReact(react: any): any;
     export function getReact(): any;
     export function setImmutable(imm: any): any;
@@ -23,6 +28,13 @@ declare module '__Overworld/overworld/utils/mixin-for' {
         emit: (eventName: string, ...args: any[]) => void;
     };
     export = mixinFor;
+}
+
+declare module '__Overworld/overworld/utils/emittable' {
+    export = Emittable;
+    var Emittable: {
+        emit: (eventName: string, ...args: any[]) => void;
+    };
 }
 
 declare module '__Overworld/overworld/portal' {
@@ -58,7 +70,7 @@ declare module '__Overworld/overworld/world' {
         state: any;
         component: any;
         init(props: any, state: any): void;
-        update(state: any): void;
+        update(updater: any): void;
         aggregator: Aggregator<any, any, any>;
         pause(): void;
         resume(): void;
