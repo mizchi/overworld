@@ -4,10 +4,10 @@ exports.utils = require('./overworld/utils/utils');
 exports.Emittable = require('./overworld/utils/emittable');
 exports.Portal = require('./overworld/portal');
 exports.Context = require('./overworld/context');
-exports.setReact = exports.utils.setReact;
+exports.LifeCycle = require('./overworld/lifecycle');
 exports.subscriber = function (fn) { return fn; }; // override function type
 
-},{"./overworld/context":3,"./overworld/portal":5,"./overworld/utils/emittable":6,"./overworld/utils/utils":7}],2:[function(require,module,exports){
+},{"./overworld/context":3,"./overworld/lifecycle":4,"./overworld/portal":5,"./overworld/utils/emittable":6,"./overworld/utils/utils":7}],2:[function(require,module,exports){
 // This class is real Aggregator instance
 // but user was given IAggregator
 var Aggregator = (function () {

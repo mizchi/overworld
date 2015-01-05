@@ -1,7 +1,5 @@
 #!/usr/bin/env sh
 tsc -d -m commonjs -t es5 src/index.ts  --outDir lib
-./scripts/typegen
 mkdir -p dist
-cp lib/Overworld.d.ts dist/overworld.d.ts
 browserify -o dist/overworld.js -s Overworld lib/index.js
 uglifyjs -o dist/overworld.min.js dist/overworld.js

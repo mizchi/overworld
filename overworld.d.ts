@@ -8,6 +8,16 @@ declare module Overworld {
     then<U>(onFulfilled?: (value: R) => U, onRejected?: (error: any) => void): Thenable<U>;
   }
 
+  export var LifeCycle: {
+    CREATED:   string;
+    UPDATED:   string;
+    MOUNTED:   string;
+    UNMOUNTED: string;
+    PAUSED:    string;
+    RESUMED:   string;
+    DISPOSED:  string;
+  };
+
   export class Portal {
     mount(el: HTMLElement): void;
     transition(name: string, arg: any): Thenable<any>;
