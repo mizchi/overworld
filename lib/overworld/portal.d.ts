@@ -1,3 +1,4 @@
+import Context = require('./context');
 declare class Portal {
     _linkMap: any;
     _caches: any;
@@ -6,7 +7,9 @@ declare class Portal {
     private _cursor;
     constructor();
     private activeNode;
+    private activeComponent;
     getActiveEmitter(): any;
+    getActiveContext(): Context;
     link(name: any, world: any): void;
     private buildLinkNode(name, forceCreate?);
     private renderNode(node, props, component);

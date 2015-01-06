@@ -16,6 +16,9 @@ interface Cache {
   uuid: string;
 }
 
+/*declare class EE {};
+var EventEmitter: typeof EE = require('events').EventEmitter;*/
+
 class Portal {
   _linkMap: any; // string => typeof Context
   _caches: any; // string => React.Component
@@ -25,6 +28,8 @@ class Portal {
   private _cursor: number;
 
   constructor(){
+    /*EventEmitter.call(this);*/
+    /*super();*/
     this._linkMap = {}; //TODO: valid struct
     this._caches = {};
     this._nodes = [];
@@ -32,10 +37,16 @@ class Portal {
   }
 
   private get activeNode():LinkNode {return this._nodes[this._cursor];}
+  private get activeComponent() {
+    return this._caches[this.activeNode.type].component;
+  }
 
-  // for mixin
-  getActiveEmitter(){
+  public getActiveEmitter(){
     return this.activeNode.instance.emitter;
+  }
+
+  public getActiveContext(){
+    return this.activeNode.instance;
   }
 
   public link(name, world){

@@ -190,8 +190,12 @@ module.exports = LifeCycle;
 },{}],5:[function(require,module,exports){
 var utils = require('./utils/utils');
 var LifeCycle = require('./lifecycle');
+/*declare class EE {};
+var EventEmitter: typeof EE = require('events').EventEmitter;*/
 var Portal = (function () {
     function Portal() {
+        /*EventEmitter.call(this);*/
+        /*super();*/
         this._linkMap = {}; //TODO: valid struct
         this._caches = {};
         this._nodes = [];
@@ -204,9 +208,18 @@ var Portal = (function () {
         enumerable: true,
         configurable: true
     });
-    // for mixin
+    Object.defineProperty(Portal.prototype, "activeComponent", {
+        get: function () {
+            return this._caches[this.activeNode.type].component;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Portal.prototype.getActiveEmitter = function () {
         return this.activeNode.instance.emitter;
+    };
+    Portal.prototype.getActiveContext = function () {
+        return this.activeNode.instance;
     };
     Portal.prototype.link = function (name, world) {
         if (this._linkMap[name])
