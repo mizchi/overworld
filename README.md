@@ -80,7 +80,7 @@ class Portal {
   mount(el: HTMLElement): void;
 
   // transition to associated context by name
-  transiteon(name: string, arg: any): Thenable<any>;
+  transition(name: string, arg: any): Thenable<any>;
 }
 ```
 
