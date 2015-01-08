@@ -395,15 +395,24 @@ module.exports = Portal;
 
 },{"./lifecycle":4,"./utils/utils":7}],6:[function(require,module,exports){
 var Emittable = {
+    //search parent emitter
+    _getEmitter: function () {
+        var emittable = this;
+        while (emittable && !emittable.props.emitter) {
+            if (!emittable._owner)
+                throw 'emitter is undefined';
+            emittable = emittable._owner;
+        }
+        if (emittable.emitter == null)
+            throw 'emitter is undefined';
+        return emittable.emitter;
+    },
     emit: function (eventName) {
         var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
         }
-        var emitter = this.props.emitter;
-        if (!emitter) {
-            throw 'emitter is undefined';
-        }
+        var emitter = this._getEmitter();
         emitter.emit.apply(emitter, [eventName].concat(args));
     }
 };
