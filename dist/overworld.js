@@ -403,9 +403,9 @@ var Emittable = {
                 throw 'emitter is undefined';
             emittable = emittable._owner;
         }
-        if (emittable.emitter == null)
+        if (emittable.props.emitter == null)
             throw 'emitter is undefined';
-        return emittable.emitter;
+        return emittable.props.emitter;
     },
     emit: function (eventName) {
         var args = [];
