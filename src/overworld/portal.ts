@@ -93,8 +93,6 @@ class Portal {
       target: target
     };
 
-    //fooo
-    node.instance.emitter.emit(LifeCycle.CREATED);
 
     return new Promise((done) =>{
       /*this.renderNode(node, props, component).then(()=> done({node:node, cache: cache}))*/
@@ -157,7 +155,10 @@ class Portal {
 
         this._cursor = 0;
         this._nodes.push(node);
-        this.renderNode(node, props, component).then(done);
+        this.renderNode(node, props, component).then(() => {
+          if(!component) node.instance.emitter.emit(LifeCycle.CREATED);
+          done();
+        });
       });
     });
   }
@@ -190,7 +191,12 @@ class Portal {
           this._nodes.length = this._cursor;
           this._nodes.push(node);
         }
-        this.renderNode(node, props, component).then(done);
+
+        this.renderNode(node, props, component).then(() => {
+          if(!component) node.instance.emitter.emit(LifeCycle.CREATED);
+          done();
+        });
+
       });
     });
   }
