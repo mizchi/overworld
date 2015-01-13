@@ -357,8 +357,12 @@ var Portal = (function () {
                     _this._nodes.push(node);
                 }
                 _this.renderNode(node, props, component).then(function () {
-                    if (!component)
+                    if (component) {
+                        node.instance.emitter.emit(LifeCycle.RESUMED);
+                    }
+                    else {
                         node.instance.emitter.emit(LifeCycle.CREATED);
+                    }
                     done();
                 });
             });

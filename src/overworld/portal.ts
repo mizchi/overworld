@@ -193,7 +193,11 @@ class Portal {
         }
 
         this.renderNode(node, props, component).then(() => {
-          if(!component) node.instance.emitter.emit(LifeCycle.CREATED);
+          if(component) {
+            node.instance.emitter.emit(LifeCycle.RESUMED);
+          } else {
+            node.instance.emitter.emit(LifeCycle.CREATED);
+          }
           done();
         });
 
