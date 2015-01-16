@@ -24,6 +24,7 @@ declare module Overworld {
   }
 
   export class Context<A, B> {
+    component: any;
     props: A;
     state: B;
     update(): void;
